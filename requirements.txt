@@ -56,6 +56,9 @@ rpds-py==0.24.0
 safetensors==0.5.3
 scikit-learn==1.6.1
 scipy==1.15.2
+sdmetrics==0.20.1
+sdv==1.20.1
+seaborn==0.13.2
 sentence-transformers==4.1.0
 setuptools==79.0.1
 six==1.17.0
@@ -78,4 +81,5 @@ tzdata==2025.2
 urllib3==2.4.0
 watchdog==6.0.0
 zstandard==0.23.0
+
 
