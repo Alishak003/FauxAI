@@ -1,23 +1,27 @@
 import streamlit as st
+from huggingface_hub import InferenceApi
 from Components.home import Section as HomePage
 from Components.SyntheticDatagenerator import Section as FirstSection
 from Components.customModelTrainer import Section as SecondSection
 from Components.metrics_final import Section as ThirdSection
 from dotenv import load_dotenv
 import os
-import requests
 
-HF_API_URL = "https://api-inference.huggingface.co/models/TinyLlama/TinyLlama-1.1B-Chat-v1.0"
+# Load environment variables
 load_dotenv()
-
-# Retrieve the variable
 HF_TOKEN = os.getenv("HF_TOKEN")
-headers = {"Authorization": f"Bearer {HF_TOKEN}"}
+
+# Hugging Face Inference Client
+
+inference = InferenceApi(
+    repo_id="TinyLlama/TinyLlama-1.1B-Chat-v1.0",
+    token=HF_TOKEN
+)
 
 if "page" not in st.session_state:
     st.session_state.page = 'Home'
 
-# Sidebar options
+# Sidebar navigation
 with st.sidebar:
     st.header("Navigation")
     if st.button("Home"):
@@ -29,10 +33,12 @@ with st.sidebar:
     if st.button("Evaluation & Metrics"):
         st.session_state.page = "📊 Evaluation & Metrics Center"
     st.markdown('---')
+
     # --- Assistant ---
     st.subheader("Tinyllama Assistant")
     if "chat_history" not in st.session_state:
         st.session_state.chat_history = []
+
     user_input = st.text_input("Ask something:", key="chat_input")
     col1, col2 = st.columns([1, 1])
 
@@ -44,25 +50,19 @@ with st.sidebar:
         if st.button("Send", key="send_btn"):
             if user_input:
                 try:
-                    payload = {"inputs": user_input}
-                    response = requests.post(HF_API_URL, headers=headers, json=payload)
-                    result = response.json()
-
-                    if "error" in result:
-                        reply = f"⚠️ API Error: {result['error']}"
-                    else:
-                        reply = result[0]["generated_text"]
+                    # Send request to Hugging Face model
+                    raw = inference(inputs=user_input, raw_response=True)
+                    output = raw.text.strip()
+                    st.session_state.chat_history.append(("You", user_input))
+                    st.session_state.chat_history.append(("TinyLlama", output))
                 except Exception as e:
-                    reply = f"⚠️ Error: {str(e)}"
-
-                st.session_state.chat_history.append(("You", user_input))
-                st.session_state.chat_history.append(("Assistant", reply))
+                    st.session_state.chat_history.append(("System", f"⚠️ Error: {e}"))
 
     # Display last 5 messages
     for sender, msg in reversed(st.session_state.chat_history[-5:]):
         st.markdown(f"**{sender}:** {msg}")
 
-
+# Main content
 st.title(st.session_state.page)
 if st.session_state.page == "Home":
     HomePage()
@@ -72,7 +72,3 @@ if st.session_state.page == "🛠️ Train Custom Synthetic Data Model":
     SecondSection()
 if st.session_state.page == "📊 Evaluation & Metrics Center":
     ThirdSection()
-    
-    
-#main page
-
