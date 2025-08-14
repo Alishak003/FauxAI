@@ -34,33 +34,33 @@ with st.sidebar:
         st.session_state.page = "📊 Evaluation & Metrics Center"
     st.markdown('---')
 
-    # --- Assistant ---
-    st.subheader("Tinyllama Assistant")
-    if "chat_history" not in st.session_state:
-        st.session_state.chat_history = []
+    # # --- Assistant ---
+    # st.subheader("Tinyllama Assistant")
+    # if "chat_history" not in st.session_state:
+    #     st.session_state.chat_history = []
 
-    user_input = st.text_input("Ask something:", key="chat_input")
-    col1, col2 = st.columns([1, 1])
+    # user_input = st.text_input("Ask something:", key="chat_input")
+    # col1, col2 = st.columns([1, 1])
 
-    with col2:
-        if st.button("Clear", key="clr_btn"):
-            st.session_state.chat_history = []
+    # with col2:
+    #     if st.button("Clear", key="clr_btn"):
+    #         st.session_state.chat_history = []
 
-    with col1:
-        if st.button("Send", key="send_btn"):
-            if user_input:
-                try:
-                    # Send request to Hugging Face model
-                    raw = inference(inputs=user_input, raw_response=True)
-                    output = raw.text.strip()
-                    st.session_state.chat_history.append(("You", user_input))
-                    st.session_state.chat_history.append(("TinyLlama", output))
-                except Exception as e:
-                    st.session_state.chat_history.append(("System", f"⚠️ Error: {e}"))
+    # with col1:
+    #     if st.button("Send", key="send_btn"):
+    #         if user_input:
+    #             try:
+    #                 # Send request to Hugging Face model
+    #                 raw = inference(inputs=user_input, raw_response=True)
+    #                 output = raw.text.strip()
+    #                 st.session_state.chat_history.append(("You", user_input))
+    #                 st.session_state.chat_history.append(("TinyLlama", output))
+    #             except Exception as e:
+    #                 st.session_state.chat_history.append(("System", f"⚠️ Error: {e}"))
 
-    # Display last 5 messages
-    for sender, msg in reversed(st.session_state.chat_history[-5:]):
-        st.markdown(f"**{sender}:** {msg}")
+    # # Display last 5 messages
+    # for sender, msg in reversed(st.session_state.chat_history[-5:]):
+    #     st.markdown(f"**{sender}:** {msg}")
 
 # Main content
 st.title(st.session_state.page)
