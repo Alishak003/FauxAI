@@ -3,7 +3,16 @@ from Components.home import Section as HomePage
 from Components.SyntheticDatagenerator import Section as FirstSection
 from Components.customModelTrainer import Section as SecondSection
 from Components.metrics_final import Section as ThirdSection
+from dotenv import load_dotenv
+import os
 import requests
+
+HF_API_URL = "https://api-inference.huggingface.co/models/TinyLlama/TinyLlama-1.1B-Chat-v1.0"
+load_dotenv()
+
+# Retrieve the variable
+HF_TOKEN = os.getenv("HF_TOKEN")
+headers = {"Authorization": f"Bearer {HF_TOKEN}"}
 
 if "page" not in st.session_state:
     st.session_state.page = 'Home'
@@ -35,13 +44,17 @@ with st.sidebar:
         if st.button("Send", key="send_btn"):
             if user_input:
                 try:
-                    response = requests.post(
-                        "http://localhost:11434/api/generate",
-                        json={"model": "tinyllama", "prompt": user_input, "stream": False}
-                    )
-                    reply = response.json()["response"]
+                    payload = {"inputs": user_input}
+                    response = requests.post(HF_API_URL, headers=headers, json=payload)
+                    result = response.json()
+
+                    if "error" in result:
+                        reply = f"⚠️ API Error: {result['error']}"
+                    else:
+                        reply = result[0]["generated_text"]
                 except Exception as e:
                     reply = f"⚠️ Error: {str(e)}"
+
                 st.session_state.chat_history.append(("You", user_input))
                 st.session_state.chat_history.append(("Assistant", reply))
 
